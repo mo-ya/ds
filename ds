@@ -1,0 +1,30 @@
+#!/bin/bash
+##
+##   ds - Directories usage Summary tool
+##
+## Copyright (C) 2015 Y.Morikawa <http://moya-notes.blogspot.jp/>
+##
+## License: MIT License  (See LICENSE.md)
+##
+set -e
+
+target=.
+if [ -n "$1" ]; then
+    target=$1
+fi
+
+org_dir=$(pwd)
+cd $target
+
+maxnum=$(ls -1a | grep -vE "^\.+$" | wc -l)
+
+i=0
+while [ $i -lt $maxnum ]; do
+    i=$(( i + 1 ))
+    ls -1a | grep -vE "^\.+$" | head -${i} | tail -1 | xargs -I% find % -type f | wc -l | tr '\012' "\t"
+    ls -1a | grep -vE "^\.+$" | head -${i} | tail -1 | xargs -I% du -sk % | awk '{print $1}' | tr '\012' "\t"
+    ls -1a | grep -vE "^\.+$" | head -${i} | tail -1 | xargs -I% du -sh % | awk '{print $1}' | tr '\012' "\t"
+    ls -1a | grep -vE "^\.+$" | head -${i} | tail -1
+done
+
+cd $org_dir
