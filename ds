@@ -8,10 +8,51 @@
 ##
 set -e
 
+help_msg(){
+    echo ""
+    echo "$(basename $0): Directories usage Summary tool"
+    echo ""
+    echo "Usage: "
+    echo "   ./$(basename $0) [Options] [dir]"
+    echo ""
+    echo "Options: "
+    echo "   -a: Display total"
+    echo "   -h: Display this help message"
+    echo ""
+    echo "Documents: "
+    echo "   https://github.com/mo-ya/ds"
+    echo ""
+}
+
 target=.
-if [ -n "$1" ]; then
-    target=$1
-fi
+
+total_display=
+
+while (( $# > 0 )) ; do
+    case "$1" in
+        -a)
+            total_display=1
+            shift
+            ;;
+        -h)
+            help_msg
+            shift
+            exit
+            ;;
+        -*)
+            echo "" >&2
+            echo "  ERROR: \"$1\" is unknown option."     >&2
+            echo "         Please use following options"  >&2
+            echo "" >&2
+            help_msg
+            exit 1
+            ;;
+        *)
+            target=$1
+            break
+            ;;
+    esac
+done
 
 org_dir=$(pwd)
 cd $target
@@ -26,5 +67,13 @@ while [ $i -lt $maxnum ]; do
     ls -1a | grep -vE "^\.+$" | head -${i} | tail -1 | xargs -I% du -sh % | awk '{print $1}' | tr '\012' "\t"
     ls -1a | grep -vE "^\.+$" | head -${i} | tail -1
 done
+
+if [ -n "$total_display" ]; then
+    echo "---------------------------------------------"
+    find . -type f | wc -l | tr '\012' "\t"
+    du -sk . | awk '{print $1}' | tr '\012' "\t"
+    du -sh . | awk '{print $1}' | tr '\012' "\t"
+    echo "Total"
+fi
 
 cd $org_dir
